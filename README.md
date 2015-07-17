@@ -22,6 +22,7 @@
 - SLF4j + logback
 - DBMS
     + H2
+    + c3p0 DB POOL
 
 ### 기동전 확인 사항
 - JDK 1.7 이상 필요
