@@ -3,6 +3,7 @@ package kr.pe.lahuman.test;
 import kr.pe.lahuman.Application;
 import kr.pe.lahuman.board.Board;
 import kr.pe.lahuman.board.BoardRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -26,14 +27,16 @@ import java.util.List;
 @WebAppConfiguration
 @SpringApplicationConfiguration(classes = Application.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Slf4j
 public class BoardTest {
-    static final Logger log = LoggerFactory.getLogger(BoardTest.class);
+
 
     @Autowired
     private BoardRepository boardRepository;
 
     @Test
     public void add(){
+
         boardRepository.save(new Board("광규", "안녕하세요.", "방갑습니다. 앞으로 잘 부탁 드려요."));
         boardRepository.save(new Board("광규", "안녕하세요.", "방갑습니다. 앞으로 잘 부탁 드려요."));
         boardRepository.save(new Board("광규", "안녕하세요.", "방갑습니다. 앞으로 잘 부탁 드려요."));

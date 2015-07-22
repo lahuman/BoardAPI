@@ -1,9 +1,6 @@
 package kr.pe.lahuman.board;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.*;
@@ -16,6 +13,7 @@ import java.util.Date;
 @Table(name="BOARD")
 @Data
 @NoArgsConstructor
+@RequiredArgsConstructor
 public class Board {
 
     @Id
