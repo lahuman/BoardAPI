@@ -2,6 +2,7 @@ package kr.pe.lahuman;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -33,10 +34,9 @@ import java.util.List;
 @Configuration
 @EnableAutoConfiguration
 @ComponentScan
+@Slf4j
 public class Application
         extends WebMvcConfigurerAdapter {
-
-    static final Logger log = LoggerFactory.getLogger(Application.class);
 
     /**
      * Spring Boot 기동

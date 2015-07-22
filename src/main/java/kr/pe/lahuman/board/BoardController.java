@@ -1,5 +1,7 @@
 package kr.pe.lahuman.board;
 
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.logging.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +19,8 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(value="/api/posts")
+@Slf4j
 public class BoardController {
-
-    static final Logger log = LoggerFactory.getLogger(BoardController.class);
-
 
     @Autowired
     private BoardRepository boardRepository;
@@ -40,7 +40,7 @@ public class BoardController {
 
     @ResponseBody
     @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Board view(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public Board view(@NonNull @PathVariable Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Board board = getBoard(id);
         return board;
     }
@@ -73,9 +73,8 @@ public class BoardController {
 
     @ResponseBody
     @RequestMapping(value = "{id}", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Board modify(@PathVariable Long id, @RequestBody Board board, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public Board modify(@NonNull @PathVariable Long id, @RequestBody Board board, HttpServletRequest request, HttpServletResponse response) throws Exception {
         getBoard(id);
-
         board.setId(id);
         return boardRepository.save(board);
     }
@@ -83,7 +82,7 @@ public class BoardController {
 
     @ResponseBody
     @RequestMapping(value = "{id}", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Board remove(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public Board remove(@NonNull @PathVariable Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
         getBoard(id);
         boardRepository.delete(id);
         return sucessBoardMsg("ID : ["+id+ "] 삭제되었습니다.");

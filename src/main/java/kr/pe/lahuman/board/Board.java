@@ -16,15 +16,7 @@ import java.util.Date;
 @Table(name="BOARD")
 @Data
 @NoArgsConstructor
-@ToString
 public class Board {
-
-
-    public Board(String author,String title, String body){
-        this.author = author;
-        this.title = title;
-        this.body = body;
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
