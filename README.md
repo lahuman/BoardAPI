@@ -1,5 +1,9 @@
 #게시판 API
 
+## 2015.09.21 추가 내용
+ - 백기선님의 강의를 듣고 제가 잘 모르던 JPA 와 jUnit 관련 리펙토링을 진행 하였습니다.
+ - 참고 URL : https://github.com/keesun/amugona
+  
 ## 개요
  - 작성자 : 임광규
  - 설명

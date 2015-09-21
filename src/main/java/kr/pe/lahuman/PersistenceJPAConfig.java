@@ -40,11 +40,6 @@ public class PersistenceJPAConfig {
 
     @Bean
     public DataSource dataSource() throws PropertyVetoException, SQLException {
-//        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-//        dataSource.setDriverClassName("org.h2.Driver");
-//        dataSource.setUrl("jdbc:h2:~/lahuman;DB_CLOSE_ON_EXIT=FALSE");
-//        dataSource.setUsername( "sa" );
-//        dataSource.setPassword( "" );
 
         ComboPooledDataSource dataSource = new ComboPooledDataSource();
         dataSource.setDriverClass("org.h2.Driver");
@@ -78,8 +73,7 @@ public class PersistenceJPAConfig {
 
     Properties additionalProperties() {
         Properties properties = new Properties();
-        properties.setProperty("hibernate.hbm2ddl.auto", "update");
-//        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL5Dialect");
+        properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         properties.setProperty("hibernate.show_sql", "true");
         properties.setProperty("hibernate.format_sql", "true");

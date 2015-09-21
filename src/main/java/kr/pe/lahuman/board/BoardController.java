@@ -1,18 +1,25 @@
 package kr.pe.lahuman.board;
 
+import kr.pe.lahuman.common.ErrorResponse;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.logging.Log;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by lahuman on 2015-06-23.
@@ -23,68 +30,80 @@ import java.util.List;
 public class BoardController {
 
     @Autowired
-    private BoardRepository boardRepository;
+    private BoardService boardService;
 
-    @ResponseBody
-    @RequestMapping( method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public List<Board> list(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        log.debug("call list");
-        List<Board> list = boardRepository.findAll();
-        list = list==null?new ArrayList<Board>():list;
+    @Autowired
+    private ModelMapper modelMapper;
 
-        if(list.size() == 0){
-            throw new Exception("목록이 비었습니다.");
+    @RequestMapping( method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    public PageImpl<BoardDto.Response> list(Pageable pageable) throws Exception {
+        Page<Board> page = boardService.findAll(pageable);
+        List<BoardDto.Response> content = page.getContent().stream()
+                .map(board -> modelMapper.map(board, BoardDto.Response.class))
+                .collect(Collectors.toList());
+        return new PageImpl<BoardDto.Response>(content, pageable, page.getTotalElements());
+    }
+
+    @RequestMapping(value = "{id}", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    public BoardDto.Response view(@NonNull @PathVariable Long id) throws Exception {
+        Board board = boardService.getBoard(id);
+        return modelMapper.map(board, BoardDto.Response.class);
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST)
+    public ResponseEntity createBoard(@RequestBody @Valid BoardDto.Create create, BindingResult result) throws Exception {
+        if(result.hasErrors()){
+            ErrorResponse errorResponse = new ErrorResponse();
+            errorResponse.setMessage("Wrong request!");
+            errorResponse.setCode("bad.request");
+            //TODO : will be use BindingResult
+            return new ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST);
         }
-        return list;
+        Board board = boardService.createBoard(create);
+        return new ResponseEntity(modelMapper.map(board, BoardDto.Response.class), HttpStatus.CREATED);
     }
 
-    @ResponseBody
-    @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Board view(@NonNull @PathVariable Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        Board board = getBoard(id);
-        return board;
-    }
-
-    private Board getBoard(@PathVariable Long id) throws Exception {
-        Board board = boardRepository.findOne(id);
-
-        if(board == null) {
-            throw new Exception("ID : ["+id+ "] 결과 없음");
+    @RequestMapping(value = "{id}", method = RequestMethod.PUT)
+    public ResponseEntity updateBoard(@NonNull @PathVariable Long id, @RequestBody @Valid BoardDto.Update updateDto, BindingResult result) throws Exception {
+        if(result.hasErrors()){
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
-        return board;
+        Board updateBoard = boardService.update(id, updateDto);
+        return new ResponseEntity(modelMapper.map(updateBoard, BoardDto.Response.class), HttpStatus.OK);
     }
 
-    private Board errorBoardMsg(String msg) {
-        return new Board("ERROR", msg);
-    }
 
-    private Board sucessBoardMsg(String msg) {
-        return new Board("SUCCESS", msg);
-    }
-
-    @ResponseBody
-    @RequestMapping(method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Board add(@RequestBody Board board, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        if(board.getId() != 0){
-            throw new Exception("잘못된 요청입니다.\n변경 요청은 method=PUT 방식으로 호출하여 주세요.");
+    @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
+    public ResponseEntity remove(@NonNull @PathVariable Long id, @RequestBody @Valid BoardDto.Delete deleteDto, BindingResult result) throws Exception {
+        if(result.hasErrors()){
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
-        return boardRepository.save(board);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "{id}", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Board modify(@NonNull @PathVariable Long id, @RequestBody Board board, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        getBoard(id);
-        board.setId(id);
-        return boardRepository.save(board);
+        boardService.delete(id, deleteDto);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
 
-    @ResponseBody
-    @RequestMapping(value = "{id}", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Board remove(@NonNull @PathVariable Long id, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        getBoard(id);
-        boardRepository.delete(id);
-        return sucessBoardMsg("ID : ["+id+ "] 삭제되었습니다.");
+
+    //Excpetion handler
+    @ExceptionHandler(BoardException.BoardNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBoardNotFoundException(BoardException.BoardNotFoundException e){
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setMessage("[" + e.getId() + "] dose not have it!");
+        errorResponse.setCode("board.not.found.exception");
+        return errorResponse;
     }
+
+    @ExceptionHandler(BoardException.BoardWrongPasswordException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleWrongPasswordException(BoardException.BoardWrongPasswordException e){
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setMessage("[" + e.getId() + "] wrong password!!");
+        errorResponse.setCode("board.wrong.password.exception");
+        return errorResponse;
+    }
+
 }

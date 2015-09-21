@@ -21,7 +21,7 @@ public class Board {
     private long id;
 
     //작성자
-    @Column(length=100, nullable = false)
+    @Column(length=100, nullable = false,updatable = false)
     @NonNull
     private String author;
 
@@ -29,6 +29,10 @@ public class Board {
     @Column(length=1000, nullable = false)
     @NonNull
     private String title;
+
+    @Column(length = 100, nullable = false, updatable = false)
+    @NonNull
+    private String passwd;
 
     //본문
     @Column(length=4000, nullable = false)
@@ -41,14 +45,6 @@ public class Board {
     @Column(name="update_date", insertable = false, updatable = true)
     private Date updateDate;
 
-    private String status="SUCCESS";
-
-    private String message;
-
-    public Board(String status, String message) {
-        this.status = status;
-        this.message = message;
-    }
 
     @PrePersist
     protected void setCreate() throws Exception {
