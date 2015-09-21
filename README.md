@@ -3,7 +3,8 @@
 ## 2015.09.21 추가 내용
  - 백기선님의 강의를 듣고 제가 잘 모르던 JPA 와 jUnit 관련 리펙토링을 진행 하였습니다.
  - 참고 URL : https://github.com/keesun/amugona
-  
+ - 추가적으로 JDK 1.8 이상을 지원 하도록 변경 되었습니다.
+ 
 ## 개요
  - 작성자 : 임광규
  - 설명
@@ -12,7 +13,7 @@
 ### 개발환경
 - IDE
     + IntelliJ
-    + JDK 1.7 이상
+    + JDK 1.8 이상
     + 필수 Plugin
         - Lombok Plugin
 
