@@ -56,11 +56,7 @@ public class BoardController {
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity createBoard(@RequestBody @Valid BoardDto.Create create, BindingResult result) throws Exception {
         if(result.hasErrors()){
-            ErrorResponse errorResponse = new ErrorResponse();
-            errorResponse.setMessage("Wrong request!");
-            errorResponse.setCode("bad.request");
-            //TODO : will be use BindingResult
-            return new ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST);
+           return validation(result);
         }
         Board board = boardService.createBoard(create);
         return new ResponseEntity(modelMapper.map(board, BoardDto.Response.class), HttpStatus.CREATED);
@@ -69,7 +65,7 @@ public class BoardController {
     @RequestMapping(value = "{id}", method = RequestMethod.PUT)
     public ResponseEntity updateBoard(@NonNull @PathVariable Long id, @RequestBody @Valid BoardDto.Update updateDto, BindingResult result) throws Exception {
         if(result.hasErrors()){
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+          return validation(result);
         }
         Board updateBoard = boardService.update(id, updateDto);
         return new ResponseEntity(modelMapper.map(updateBoard, BoardDto.Response.class), HttpStatus.OK);
@@ -79,7 +75,7 @@ public class BoardController {
     @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
     public ResponseEntity remove(@NonNull @PathVariable Long id, @RequestBody @Valid BoardDto.Delete deleteDto, BindingResult result) throws Exception {
         if(result.hasErrors()){
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+           return validation(result);
         }
         boardService.delete(id, deleteDto);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -106,4 +102,22 @@ public class BoardController {
         return errorResponse;
     }
 
+    private ResponseEntity validation(BindingResult result) {
+		ErrorResponse errorResponse = new ErrorResponse();
+		errorResponse.setMessage("Wrong request!");
+		errorResponse.setCode("bad.request");
+		List<kr.pe.lahuman.common.ErrorResponse.FieldError> errorList = new ArrayList<>();
+		for (Object object : result.getAllErrors()) {
+		    if(object instanceof FieldError) {
+		    	kr.pe.lahuman.common.ErrorResponse.FieldError fe = new kr.pe.lahuman.common.ErrorResponse.FieldError();
+		        FieldError fieldError = (FieldError) object;
+		        fe.setField(fieldError.getField());
+		        fe.setCode(fieldError.getCode());
+		        fe.setMessage(fieldError.getDefaultMessage());
+		        errorList.add(fe);
+		    }
+		}
+		errorResponse.setErrors(errorList);
+		return new ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST);
+	}
 }
