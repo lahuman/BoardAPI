@@ -13,11 +13,11 @@ public class ErrorResponse {
     private String code;
     private List<FieldError> errors;
 
-
+    @Data
     public static class FieldError {
         private String field;
-        private String value;
-        private String reason;
+        private String code;
+        private String message;
 
     }
 }
